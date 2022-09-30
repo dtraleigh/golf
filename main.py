@@ -23,19 +23,33 @@ class GolfEngine:
         self.deck.shuffle()
         self.player1 = Player("Player 1")
         self.player2 = Player("Player 2")
-        self.deal()
         self.pile_down = PileDown()
         self.pile_up = PileUp()
+        self.deal()
         self.current_player = self.player1
         self.state = GameState.PLAYING
 
     def deal(self):
+        # 6 cards to each player
         for i in range(0, 6):
             self.player1.draw(self.deck)
             self.player2.draw(self.deck)
 
-        print(f"Player 1 cards: {self.player1.hand}")
-        print(f"Player 2 cards: {self.player2.hand}")
+        # Add the remainder of the cards to pile_down
+        while self.deck.length() > 0:
+            self.pile_down.add(self.deck.deal_card())
+
+        # Add a card from pile_down to pile_up
+        self.pile_up.add(self.pile_down.deal_card())
+
+        # print(f"Player 1 cards: {self.player1.hand}")
+        # print(f"Player 2 cards: {self.player2.hand}")
+
+    def switchPlayer(self):
+        if self.currentPlayer == self.player1:
+            self.currentPlayer = self.player2
+        else:
+            self.currentPlayer = self.player1
 
 
 

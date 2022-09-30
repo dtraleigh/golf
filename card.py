@@ -103,6 +103,9 @@ class PileDown:
     def add(self, card):
         self.cards.append(card)
 
+    def deal_card(self):
+        return self.cards.pop()
+
 
 class PileUp:
     def __init__(self):
