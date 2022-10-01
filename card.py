@@ -28,6 +28,10 @@ class Card:
     def value(self):
         return self._value
 
+    @property
+    def hand_position(self):
+        return self.X, self.Y
+
     # @suit.setter
     # def suit(self, suit):
     #     if suit in ["HEART", "CLUB", "DIAMOND", "SPADE"]:
@@ -94,6 +98,10 @@ class Player:
 
     def draw(self, deck):
         self.hand.append(deck.deal_card())
+
+    # def set_position(self):
+    #     # Let's copy the pygame coordinate logic starting at the top left
+    #     positions = ((1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2))
 
 
 class PileDown:

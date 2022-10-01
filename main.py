@@ -46,14 +46,80 @@ class GolfEngine:
         # print(f"Player 2 cards: {self.player2.hand}")
 
     def switchPlayer(self):
-        if self.currentPlayer == self.player1:
-            self.currentPlayer = self.player2
+        if self.current_player == self.player1:
+            self.current_player = self.player2
         else:
-            self.currentPlayer = self.player1
+            self.current_player = self.player1
 
 
+# game init
+pygame.init()
+X = 1920
+Y = 1080
+bounds = (X, Y)
+screen = pygame.display.set_mode(bounds)
+pygame.display.set_caption("Golf")
 
-# pygame.init()
-# bounds = (1024, 768)
-# window = pygame.display.set_mode(bounds)
-# pygame.display.set_caption("Golf")
+# some colors
+white = (255, 255, 255)
+green = (0, 255, 0)
+blue = (0, 0, 128)
+
+# text
+font = pygame.font.Font("freesansbold.ttf", 32)
+text = font.render("Golf, the card game", True, green, blue)
+title_rect = text.get_rect()
+title_rect.center = (X // 2, 50)
+
+# card stuff
+card_back = pygame.image.load('images/BACK.png')
+card_size = (166, 232)
+
+# player hand positions
+player1_card_positions = ((100, 100), (300, 100), (100, 400), (300, 400), (100, 700), (300, 700))
+player2_card_positions = ((1420, 100), (1620, 100), (1420, 400), (1620, 400), (1420, 700), (1620, 700))
+
+# Game init
+golf = GolfEngine()
+
+is_running = True
+
+while is_running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            is_running = False
+
+    # green background
+    screen.fill((4, 157, 0))
+
+    # Title
+    screen.blit(text, title_rect)
+
+    for card, position in zip(golf.player1.hand, player1_card_positions):
+        screen.blit(pygame.transform.scale(card._image, card_size), position)
+
+    for card, position in zip(golf.player2.hand, player2_card_positions):
+        screen.blit(pygame.transform.scale(card._image, card_size), position)
+
+    # Create a Deck, deal a card, and place it on the screen
+    # deck = Deck()
+    # deck.shuffle()
+    # card1 = deck.deal_card()
+    # screen.blit(card1._image, (100, 100))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 100))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 100))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 400))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 400))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 700))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 700))
+    #
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 100))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 100))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 400))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 400))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 700))
+    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 700))
+
+    pygame.display.flip()
+
+pygame.quit()
