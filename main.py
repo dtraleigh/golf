@@ -60,6 +60,9 @@ bounds = (X, Y)
 screen = pygame.display.set_mode(bounds)
 pygame.display.set_caption("Golf")
 
+# For debugging
+DEBUG_MODE = True
+
 # some colors
 white = (255, 255, 255)
 green = (0, 255, 0)
@@ -67,8 +70,12 @@ blue = (0, 0, 128)
 
 # text
 font = pygame.font.Font("freesansbold.ttf", 32)
-text = font.render("Golf, the card game", True, green, blue)
-title_rect = text.get_rect()
+title_text = font.render("Golf, the card game", True, green, blue)
+p1_text = font.render("Player 1", True, green, blue)
+p2_text = font.render("Player 2", True, green, blue)
+
+# rects
+title_rect = title_text.get_rect()
 title_rect.center = (X // 2, 50)
 
 # card stuff
@@ -76,12 +83,27 @@ card_back = pygame.image.load('images/BACK.png')
 card_size = (166, 232)
 
 # player hand positions
-player1_card_positions = ((100, 100), (300, 100), (100, 400), (300, 400), (100, 700), (300, 700))
-player2_card_positions = ((1420, 100), (1620, 100), (1420, 400), (1620, 400), (1420, 700), (1620, 700))
+player1_card_positions = ((200, 200), (400, 200), (200, 500), (400, 500), (200, 800), (400, 800))
+player2_card_positions = ((1520, 200), (1720, 200), (1520, 500), (1720, 500), (1520, 800), (1720, 800))
 
 # Game init
 golf = GolfEngine()
 
+# Create card rects
+p1_rects = []
+p2_rects = []
+
+for card, position in zip(golf.player1.hand, player1_card_positions):
+    this_card = card._image.get_rect()
+    this_card.center = position
+    p1_rects.append(this_card)
+
+for card, position in zip(golf.player2.hand, player2_card_positions):
+    this_card = card._image.get_rect()
+    this_card.center = position
+    p2_rects.append(this_card)
+
+selected = None
 is_running = True
 
 while is_running:
@@ -92,33 +114,28 @@ while is_running:
     # green background
     screen.fill((4, 157, 0))
 
-    # Title
-    screen.blit(text, title_rect)
+    # Text rects
+    screen.blit(title_text, title_rect)
+    screen.blit(p1_text, (200, 1000))
+    screen.blit(p2_text, (1550, 1000))
 
-    for card, position in zip(golf.player1.hand, player1_card_positions):
-        screen.blit(pygame.transform.scale(card._image, card_size), position)
-
-    for card, position in zip(golf.player2.hand, player2_card_positions):
-        screen.blit(pygame.transform.scale(card._image, card_size), position)
-
-    # Create a Deck, deal a card, and place it on the screen
-    # deck = Deck()
-    # deck.shuffle()
-    # card1 = deck.deal_card()
-    # screen.blit(card1._image, (100, 100))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 100))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 100))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 400))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 400))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (100, 700))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (300, 700))
+    # for card, position in zip(golf.player1.hand, player1_card_positions):
+    #     screen.blit(pygame.transform.scale(card._image, card_size), position)
     #
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 100))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 100))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 400))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 400))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1420, 700))
-    # screen.blit(pygame.transform.scale(card1._image, card_size), (1620, 700))
+    # for card, position in zip(golf.player2.hand, player2_card_positions):
+    #     screen.blit(pygame.transform.scale(card._image, card_size), position)
+
+    for card, r in zip(golf.player1.hand, p1_rects):
+        screen.blit(pygame.transform.scale(card._image, card_size), r)
+
+    for card, r in zip(golf.player2.hand, p2_rects):
+        screen.blit(pygame.transform.scale(card._image, card_size), r)
+
+    if DEBUG_MODE:
+        mouse_position = pygame.mouse.get_pos()
+        mouse_pos_text = font.render(str(mouse_position), True, green, blue)
+        # mouse_pos_text = font.render("mouse coords", True, green, blue)
+        screen.blit(mouse_pos_text, (1000, 1000))
 
     pygame.display.flip()
 
