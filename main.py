@@ -1,56 +1,6 @@
 import pygame
 from card import *
-from enum import Enum
-
-
-class GameState(Enum):
-    PLAYING = 0
-    ENDED = 1
-
-
-class GolfEngine:
-    deck = None
-    player1 = None
-    player2 = None
-    pile_down = None
-    pile_up = None
-    current_player = None
-    state = None
-    result = None
-
-    def __init__(self):
-        self.deck = Deck()
-        self.deck.shuffle()
-        self.player1 = Player("Player 1")
-        self.player2 = Player("Player 2")
-        self.pile_down = PileDown()
-        self.pile_up = PileUp()
-        self.deal()
-        self.current_player = self.player1
-        self.state = GameState.PLAYING
-
-    def deal(self):
-        # 6 cards to each player
-        for i in range(0, 6):
-            self.player1.draw(self.deck)
-            self.player2.draw(self.deck)
-
-        # Add the remainder of the cards to pile_down
-        while self.deck.length() > 0:
-            self.pile_down.add(self.deck.deal_card())
-
-        # Add a card from pile_down to pile_up
-        self.pile_up.add(self.pile_down.deal_card())
-
-        # print(f"Player 1 cards: {self.player1.hand}")
-        # print(f"Player 2 cards: {self.player2.hand}")
-
-    def switchPlayer(self):
-        if self.current_player == self.player1:
-            self.current_player = self.player2
-        else:
-            self.current_player = self.player1
-
+from engine import *
 
 # game init
 pygame.init()
@@ -103,6 +53,13 @@ for card, position in zip(golf.player2.hand, player2_card_positions):
     this_card.center = position
     p2_rects.append(this_card)
 
+pile_down_rect = card_back.get_rect()
+pile_down_rect.center = (1300, 680)
+
+# Initial draw card
+pile_up_rect = golf.pile_up.cards[0]._image.get_rect()
+pile_up_rect.center = (950, 510)
+
 selected = None
 is_running = True
 
@@ -119,23 +76,30 @@ while is_running:
     screen.blit(p1_text, (200, 1000))
     screen.blit(p2_text, (1550, 1000))
 
-    # for card, position in zip(golf.player1.hand, player1_card_positions):
-    #     screen.blit(pygame.transform.scale(card._image, card_size), position)
-    #
-    # for card, position in zip(golf.player2.hand, player2_card_positions):
-    #     screen.blit(pygame.transform.scale(card._image, card_size), position)
-
     for card, r in zip(golf.player1.hand, p1_rects):
         screen.blit(pygame.transform.scale(card._image, card_size), r)
 
     for card, r in zip(golf.player2.hand, p2_rects):
         screen.blit(pygame.transform.scale(card._image, card_size), r)
 
+    # Create pile_down
+    screen.blit(pygame.transform.scale(card_back, card_size), pile_down_rect)
+
+    # Add initial draw card
+    screen.blit(pygame.transform.scale(golf.pile_up.cards[0]._image, card_size), pile_up_rect)
+
     if DEBUG_MODE:
         mouse_position = pygame.mouse.get_pos()
-        mouse_pos_text = font.render(str(mouse_position), True, green, blue)
-        # mouse_pos_text = font.render("mouse coords", True, green, blue)
-        screen.blit(mouse_pos_text, (1000, 1000))
+        mouse_pos_text = font.render(f"Mouse Pos: {str(mouse_position)}", True, green, blue)
+        screen.blit(mouse_pos_text, (600, 670))
+        p1_hand_text = font.render(f"P1 Hand: {str(golf.player1.hand)}", True, green, blue)
+        screen.blit(p1_hand_text, (230, 900))
+        p1_hand_text = font.render(f"P2 Hand: {str(golf.player2.hand)}", True, green, blue)
+        screen.blit(p1_hand_text, (230, 930))
+        pile_down_count = font.render(f"Cards in pile_down: {str(golf.pile_down.length())}", True, green, blue)
+        screen.blit(pile_down_count, (600, 700))
+        pile_up_count = font.render(f"Cards in pile_up: {str(golf.pile_up.length())}", True, green, blue)
+        screen.blit(pile_up_count, (600, 730))
 
     pygame.display.flip()
 

@@ -74,11 +74,8 @@ class Deck:
         self._cards.append(Card("JOKER", 1, -2))
         self._cards.append(Card("JOKER", 2, -2))
 
-        # self._cards = [Card(s, n) for s in suits for n in numbers]
-
     def shuffle(self):
         random.shuffle(self._cards)
-        # print(self._cards)
 
     def view_deck(self):
         print(f"There are {str(len(self._cards))} cards in the deck")
@@ -99,6 +96,9 @@ class Player:
     def draw(self, deck):
         self.hand.append(deck.deal_card())
 
+    def get_player_name(self):
+        return self.name
+
     # def set_position(self):
     #     # Let's copy the pygame coordinate logic starting at the top left
     #     positions = ((1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2))
@@ -114,6 +114,9 @@ class PileDown:
     def deal_card(self):
         return self.cards.pop()
 
+    def length(self):
+        return len(self.cards)
+
 
 class PileUp:
     def __init__(self):
@@ -121,3 +124,6 @@ class PileUp:
 
     def add(self, card):
         self.cards.append(card)
+
+    def length(self):
+        return len(self.cards)
