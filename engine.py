@@ -4,8 +4,9 @@ from enum import Enum
 
 
 class GameState(Enum):
-    PLAYING = 0
-    ENDED = 1
+    PREP = 0
+    PLAYING = 1
+    ENDED = 2
 
 
 class GolfEngine:
@@ -27,7 +28,7 @@ class GolfEngine:
         self.pile_up = PileUp()
         self.deal()
         self.current_player = self.player1
-        self.state = GameState.PLAYING
+        self.state = GameState.PREP
 
     def deal(self):
         # 6 cards to each player
@@ -45,8 +46,11 @@ class GolfEngine:
         # print(f"Player 1 cards: {self.player1.hand}")
         # print(f"Player 2 cards: {self.player2.hand}")
 
-    def switchPlayer(self):
+    def switch_player(self):
         if self.current_player == self.player1:
             self.current_player = self.player2
         else:
             self.current_player = self.player1
+
+    def play_game(self):
+        self.state = GameState.PLAYING

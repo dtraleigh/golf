@@ -8,6 +8,7 @@ class Card:
         self._number = number
         self._image = pygame.image.load(f"images/{self._suit}-{str(self.number)}.svg")
         self._value = value
+        self._face = False
 
     def __repr__(self):
         return f"{self._number} of {self._suit}"
@@ -31,6 +32,16 @@ class Card:
     @property
     def hand_position(self):
         return self.X, self.Y
+
+    @property
+    def face(self):
+        # face up or down, default is down which I'm calling False
+        return self._face
+
+    def flip_card(self):
+        # In golf, once a card in a hand is flipped up, it is never face down again
+        if not self._face:
+            self._face = True
 
     # @suit.setter
     # def suit(self, suit):

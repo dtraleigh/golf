@@ -21,6 +21,16 @@ def exchange_button_behavior(mouse):
     screen.blit(exchange_button_text, (exchange_button_x, exchange_button_y))
 
 
+def get_number_of_flipped_cards(hand):
+    # Take in a hand and return the number of cards that are flipped
+    flipped_cards = 0
+    for card in hand:
+        if card._face:
+            flipped_cards += 1
+
+    return flipped_cards
+
+
 # game init
 pygame.init()
 width = 1920
@@ -105,10 +115,16 @@ while is_running:
 
     ###### Some Card stuff ######
     for card, r in zip(golf.player1.hand, p1_rects):
-        screen.blit(pygame.transform.scale(card._image, card_size), r)
+        if card._face:
+            screen.blit(pygame.transform.scale(card._image, card_size), r)
+        else:
+            screen.blit(pygame.transform.scale(card_back, card_size), r)
 
     for card, r in zip(golf.player2.hand, p2_rects):
-        screen.blit(pygame.transform.scale(card._image, card_size), r)
+        if card._face:
+            screen.blit(pygame.transform.scale(card._image, card_size), r)
+        else:
+            screen.blit(pygame.transform.scale(card_back, card_size), r)
 
     # Create pile_down
     screen.blit(pygame.transform.scale(card_back, card_size), pile_down_rect)
@@ -126,34 +142,64 @@ while is_running:
         # stores the (x,y) coordinates into the variable as a tuple
         mouse_position = pygame.mouse.get_pos()
 
-        exchange_button_behavior(mouse_position)
+        # Prep phase
+        if golf.state.value == 0:
+            prep_message = font.render("Flip two cards each", True, green, blue)
+            screen.blit(prep_message, (650, 170))
 
-        # If mouse_click is inside a rect, add the border
-        for border_control, p1_rect in zip(p1_border_control, p1_rects):
-            if border_control:
-                draw_rect_border(screen, p1_rect.x, p1_rect.y)
+            # Each player only flips two cards
+            p1_num_flipped_cards = get_number_of_flipped_cards(golf.player1.hand)
+            p2_num_flipped_cards = get_number_of_flipped_cards(golf.player2.hand)
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                # Check if any p1_rects were clicked
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position_down = pygame.mouse.get_pos()
-                for c, (rect, border_control) in enumerate(zip(p1_rects, p1_border_control)):
-                    p1_click = rect.collidepoint(mouse_position_down)
-                    if p1_click == 1:
-                        p1_border_control[c] = not p1_border_control[c]
+                if event.button == 1:
+                    for rect, card in zip(p1_rects, golf.player1.hand):
+                        p1_click = rect.collidepoint(mouse_position_down)
+                        if p1_click == 1 and p1_num_flipped_cards < 2:
+                            card.flip_card()
 
-        for border_control, p2_rect in zip(p2_border_control, p2_rects):
-            if border_control:
-                draw_rect_border(screen, p2_rect.x, p2_rect.y)
+                    for rect, card in zip(p2_rects, golf.player2.hand):
+                        p2_click = rect.collidepoint(mouse_position_down)
+                        if p2_click == 1 and p2_num_flipped_cards < 2:
+                            card.flip_card()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                # Check if any p2_rects were clicked
-                mouse_position_down = pygame.mouse.get_pos()
-                for c, (rect, border_control) in enumerate(zip(p2_rects, p2_border_control)):
-                    p2_click = rect.collidepoint(mouse_position_down)
-                    if p2_click == 1:
-                        p2_border_control[c] = not p2_border_control[c]
+            if p1_num_flipped_cards == 2 and p2_num_flipped_cards == 2:
+                golf.play_game()
+
+        # playing phase
+        elif golf.state.value == 1:
+            exchange_button_behavior(mouse_position)
+
+            # If mouse_click is inside a rect, add the border
+            for border_control, p1_rect in zip(p1_border_control, p1_rects):
+                if border_control:
+                    draw_rect_border(screen, p1_rect.x, p1_rect.y)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    # Check if any p1_rects were clicked
+                    mouse_position_down = pygame.mouse.get_pos()
+                    for c, (rect, border_control) in enumerate(zip(p1_rects, p1_border_control)):
+                        p1_click = rect.collidepoint(mouse_position_down)
+                        if p1_click == 1:
+                            p1_border_control[c] = not p1_border_control[c]
+
+            for border_control, p2_rect in zip(p2_border_control, p2_rects):
+                if border_control:
+                    draw_rect_border(screen, p2_rect.x, p2_rect.y)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    # Check if any p2_rects were clicked
+                    mouse_position_down = pygame.mouse.get_pos()
+                    for c, (rect, border_control) in enumerate(zip(p2_rects, p2_border_control)):
+                        p2_click = rect.collidepoint(mouse_position_down)
+                        if p2_click == 1:
+                            p2_border_control[c] = not p2_border_control[c]
+        # game over man
+        elif golf.state.value == 2:
+            pass
 
     ###### end Game logic ######
 
@@ -169,10 +215,8 @@ while is_running:
             screen.blit(pile_down_count, (600, 700))
             pile_up_count = font.render(f"Cards in pile_up: {str(golf.pile_up.length())}", True, green, blue)
             screen.blit(pile_up_count, (600, 730))
-            # p1_border_control_debug = font.render(f"p1_border_control: {str(p1_border_control)}", True, green, blue)
-            # screen.blit(p1_border_control_debug, (600, 760))
-            # p1_rect_size = font.render(f"first rect size: {str(p1_rects[0].size)}", True, green, blue)
-            # screen.blit(p1_rect_size, (600, 790))
+            game_state = font.render(f"game state: {str(golf.state.value)}", True, green, blue)
+            screen.blit(game_state, (600, 760))
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
