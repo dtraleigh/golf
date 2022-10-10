@@ -6,7 +6,8 @@ from enum import Enum
 class GameState(Enum):
     PREP = 0
     PLAYING = 1
-    ENDED = 2
+    LASTROUND = 2
+    ENDED = 3
 
 
 class GolfEngine:

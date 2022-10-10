@@ -172,6 +172,20 @@ while is_running:
         # playing phase
         elif golf.state.value == 1:
             exchange_button_behavior(mouse_position)
+            current_player_text = font.render(f"Turn: {golf.current_player.name}", True, green, blue)
+            screen.blit(current_player_text, (950, 140))
+
+            # On their turn, a player can either
+            # Reveal a card that has _face = False
+            # OR
+            # exchange any card in the hand for the pile_up face card
+            # OR
+            # move top of pile_down to pile_up
+            # then either
+            #  1. Pass
+            #  2. exchange any card in the hand for the pile_up face card
+
+
 
             # Click on the top of pile_down and add it to the pile_up
             if event.type == pygame.MOUSEBUTTONDOWN:
