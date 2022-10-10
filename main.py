@@ -93,10 +93,12 @@ p2_border_control = [False, False, False, False, False, False]
 
 pile_down_rect = card_back.get_rect()
 pile_down_rect.center = (1300, 680)
+pile_down_rect.w, pile_down_rect.h = card_size
 
 # Initial draw card
 pile_up_rect = golf.pile_up.cards[0]._image.get_rect()
 pile_up_rect.center = (950, 510)
+pile_up_counter = 0
 
 selected = None
 is_running = True
@@ -129,8 +131,8 @@ while is_running:
     # Create pile_down
     screen.blit(pygame.transform.scale(card_back, card_size), pile_down_rect)
 
-    # Add initial draw card
-    screen.blit(pygame.transform.scale(golf.pile_up.cards[0]._image, card_size), pile_up_rect)
+    # Create pile up
+    screen.blit(pygame.transform.scale(golf.pile_up.cards[pile_up_counter]._image, card_size), pile_up_rect)
 
     ###### End Card stuff ######
 
@@ -171,6 +173,21 @@ while is_running:
         elif golf.state.value == 1:
             exchange_button_behavior(mouse_position)
 
+            # Click on the top of pile_down and add it to the pile_up
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    # Check if the pile_down was clicked
+                    mouse_position_down = pygame.mouse.get_pos()
+                    pile_down_click = pile_down_rect.collidepoint(mouse_position_down)
+                    if pile_down_click == 1:
+                        golf.pile_up.add(golf.pile_down.deal_card())
+                        pile_up_counter += 1
+                        draw_rect_border(screen, pile_down_rect.x, pile_down_rect.y)
+
+
+
+
+
             # If mouse_click is inside a rect, add the border
             for border_control, p1_rect in zip(p1_border_control, p1_rects):
                 if border_control:
@@ -197,6 +214,7 @@ while is_running:
                         p2_click = rect.collidepoint(mouse_position_down)
                         if p2_click == 1:
                             p2_border_control[c] = not p2_border_control[c]
+
         # game over man
         elif golf.state.value == 2:
             pass
@@ -215,8 +233,8 @@ while is_running:
             screen.blit(pile_down_count, (600, 700))
             pile_up_count = font.render(f"Cards in pile_up: {str(golf.pile_up.length())}", True, green, blue)
             screen.blit(pile_up_count, (600, 730))
-            game_state = font.render(f"game state: {str(golf.state.value)}", True, green, blue)
-            screen.blit(game_state, (600, 760))
+            # pile_down_rect = font.render(f"pile_down: {str(pile_down_rect.width)}, {str(pile_down_rect.height)}", True, green, blue)
+            # screen.blit(pile_down_rect, (600, 760))
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
