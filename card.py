@@ -9,6 +9,7 @@ class Card:
         self._image = pygame.image.load(f"images/{self._suit}-{str(self.number)}.svg")
         self._value = value
         self._face = False
+        self._is_selected = False
 
     def __repr__(self):
         return f"{self._number} of {self._suit}"
@@ -38,10 +39,17 @@ class Card:
         # face up or down, default is down which I'm calling False
         return self._face
 
+    @property
+    def selected(self):
+        return self._is_selected
+
     def flip_card(self):
         # In golf, once a card in a hand is flipped up, it is never face down again
         if not self._face:
             self._face = True
+
+    def select_card(self):
+        self._is_selected = not self._is_selected
 
     # @suit.setter
     # def suit(self, suit):
@@ -103,6 +111,7 @@ class Player:
     def __init__(self, name):
         self.hand = []
         self.name = name
+        self.selected_card = None
 
     def draw(self, deck):
         self.hand.append(deck.deal_card())
@@ -110,9 +119,11 @@ class Player:
     def get_player_name(self):
         return self.name
 
-    # def set_position(self):
-    #     # Let's copy the pygame coordinate logic starting at the top left
-    #     positions = ((1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2))
+    def select_card_in_hand(self, card):
+        self.selected_card = card
+
+    def get_selected_card(self):
+        return self.selected_card
 
 
 class PileDown:
@@ -132,9 +143,16 @@ class PileDown:
 class PileUp:
     def __init__(self):
         self.cards = []
+        self.selected = False
 
     def add(self, card):
         self.cards.append(card)
 
     def length(self):
         return len(self.cards)
+
+    def select_pile_up_card(self):
+        self.selected = not self.selected
+
+    def is_selected(self):
+        return self.selected
