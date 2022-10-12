@@ -75,3 +75,6 @@ class GolfEngine:
         self.switch_player()
         self.pile_up.select_pile_up_card()
         self.draw_count = 0
+        self.pile_up.selected = False
+        self.player1.unselect_all_cards()
+        self.player2.unselect_all_cards()

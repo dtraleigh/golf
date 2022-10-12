@@ -33,10 +33,6 @@ def get_number_of_flipped_cards(hand):
     return flipped_cards
 
 
-# def clear_all_borders():
-#     return [False, False, False, False, False, False]
-
-
 def user_wants_exchange():
     # return True if the user clicked the exchange button
     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -78,14 +74,17 @@ def player_turn(rects_click):
                     # Player clicked on pile_up
                     golf.pile_up.select_pile_up_card()
                 else:
-                    # If the card is face down, flip it on click
+                    # Player clicked on one of the 6 hand cards
+                    # If the card is face down, select it (border is added)
+                    # On a second click, flip it on click and end turn
                     selected_card = golf.current_player.hand[count - 2]
-                    if not selected_card.face:
-                        selected_card.flip_card()
-                        golf.switch_player()
-                    else:
-                        # else if card in this rect is face up, add the border and mark it selected
+
+                    if not golf.current_player.selected_card:
                         golf.current_player.select_card_in_hand(selected_card)
+                    else:
+                        selected_card.flip_card()
+                        golf.end_turn()
+
     # If a face up card from the hand is selected and the pile_up card is selected, the player may want to
     # make an exchange. Prompt them and offer an exchange button
     if golf.pile_up.is_selected() and golf.current_player.get_selected_card():
@@ -164,7 +163,7 @@ pile_down_rect.center = (1300, 680)
 pile_down_rect.w, pile_down_rect.h = card_size
 
 # Initial draw card
-pile_up_rect = golf.pile_up.cards[0]._image.get_rect()
+pile_up_rect = golf.pile_up.get_top_card()._image.get_rect()
 pile_up_rect.center = (950, 510)
 
 selected = None
@@ -199,7 +198,6 @@ while is_running:
     screen.blit(pygame.transform.scale(card_back, card_size), pile_down_rect)
 
     # Create pile up
-    # first position is the top
     screen.blit(pygame.transform.scale(golf.pile_up.get_top_card()._image, card_size), pile_up_rect)
 
     ###### End Card stuff ######
@@ -221,18 +219,17 @@ while is_running:
             p1_num_flipped_cards = get_number_of_flipped_cards(golf.player1.hand)
             p2_num_flipped_cards = get_number_of_flipped_cards(golf.player2.hand)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_position_down = pygame.mouse.get_pos()
-                if event.button == 1:
-                    for rect, card in zip(p1_rects, golf.player1.hand):
-                        p1_click = rect.collidepoint(mouse_position_down)
-                        if p1_click == 1 and p1_num_flipped_cards < 2:
-                            card.flip_card()
+                for rect, card in zip(p1_rects, golf.player1.hand):
+                    p1_click = rect.collidepoint(mouse_position_down)
+                    if p1_click == 1 and p1_num_flipped_cards < 2:
+                        card.flip_card()
 
-                    for rect, card in zip(p2_rects, golf.player2.hand):
-                        p2_click = rect.collidepoint(mouse_position_down)
-                        if p2_click == 1 and p2_num_flipped_cards < 2:
-                            card.flip_card()
+                for rect, card in zip(p2_rects, golf.player2.hand):
+                    p2_click = rect.collidepoint(mouse_position_down)
+                    if p2_click == 1 and p2_num_flipped_cards < 2:
+                        card.flip_card()
 
             if p1_num_flipped_cards == 2 and p2_num_flipped_cards == 2:
                 golf.play_game()
@@ -245,70 +242,19 @@ while is_running:
             possible_rects_to_click = [pile_down_rect, pile_up_rect]
 
             if golf.current_player.name == "Player 1":
-                # Player 1 Logic
                 possible_rects_to_click += p1_rects
-                # border control
-                for card, p1_rect in zip(golf.current_player.hand, p1_rects):
-                    if card == golf.current_player.get_selected_card():
-                        draw_rect_border(screen, p1_rect.x, p1_rect.y)
-
-                if golf.pile_up.selected:
-                    draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
+                player_turn(possible_rects_to_click)
             else:
-                # Player 2 Logic
                 possible_rects_to_click += p2_rects
-                # border control
-                for card, p2_rect in zip(golf.current_player.hand, p2_rects):
-                    if card == golf.current_player.get_selected_card():
-                        draw_rect_border(screen, p2_rect.x, p2_rect.y)
+                player_turn(possible_rects_to_click)
 
-                if golf.pile_up.selected:
-                    draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
+            # Adding borders to selected cards
+            for card, rect in zip(golf.current_player.hand, possible_rects_to_click[2:]):
+                if card == golf.current_player.get_selected_card():
+                    draw_rect_border(screen, rect.x, rect.y)
 
-            player_turn(possible_rects_to_click)
-
-            # If mouse_click is inside a rect, add the border to that one and remove it from the rest of the hand
-            # for border_control, p1_rect in zip(p1_border_control, p1_rects):
-            #     if border_control:
-            #         draw_rect_border(screen, p1_rect.x, p1_rect.y)
-            #
-            # # If mouse_click is inside a rect, add the border to that one and remove it from the rest of the hand
-            # for border_control, p2_rect in zip(p2_border_control, p2_rects):
-            #     if border_control:
-            #         draw_rect_border(screen, p2_rect.x, p2_rect.y)
-
-            # Click on the top of pile_down and add it to the pile_up
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     if event.button == 1:
-            #         # Check if the pile_down was clicked
-            #         mouse_position_down = pygame.mouse.get_pos()
-            #         pile_down_click = pile_down_rect.collidepoint(mouse_position_down)
-            #         if pile_down_click == 1:
-            #             golf.pile_up.add(golf.pile_down.deal_card())
-            #             pile_up_counter += 1
-            #             draw_rect_border(screen, pile_down_rect.x, pile_down_rect.y)
-            #
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     if event.button == 1:
-            #         # Check if any p1_rects were clicked
-            #         mouse_position_down = pygame.mouse.get_pos()
-            #         for c, (rect, border_control) in enumerate(zip(p1_rects, p1_border_control)):
-            #             p1_click = rect.collidepoint(mouse_position_down)
-            #             if p1_click == 1:
-            #                 p1_border_control[c] = not p1_border_control[c]
-            #
-            # for border_control, p2_rect in zip(p2_border_control, p2_rects):
-            #     if border_control:
-            #         draw_rect_border(screen, p2_rect.x, p2_rect.y)
-            #
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     if event.button == 1:
-            #         # Check if any p2_rects were clicked
-            #         mouse_position_down = pygame.mouse.get_pos()
-            #         for c, (rect, border_control) in enumerate(zip(p2_rects, p2_border_control)):
-            #             p2_click = rect.collidepoint(mouse_position_down)
-            #             if p2_click == 1:
-            #                 p2_border_control[c] = not p2_border_control[c]
+            if golf.pile_up.is_selected():
+                draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
 
         # game over man
         elif golf.state.value == 2:

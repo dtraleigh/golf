@@ -9,7 +9,7 @@ class Card:
         self._image = pygame.image.load(f"images/{self._suit}-{str(self.number)}.svg")
         self._value = value
         self._face = False
-        self._is_selected = False
+        # self._is_selected = False
 
     def __repr__(self):
         return f"{self._number} of {self._suit}"
@@ -39,31 +39,16 @@ class Card:
         # face up or down, default is down which I'm calling False
         return self._face
 
-    @property
-    def selected(self):
-        return self._is_selected
+    # def is_selected(self):
+    #     return self._is_selected
 
     def flip_card(self):
         # In golf, once a card in a hand is flipped up, it is never face down again
         if not self._face:
             self._face = True
 
-    def select_card(self):
-        self._is_selected = not self._is_selected
-
-    # @suit.setter
-    # def suit(self, suit):
-    #     if suit in ["HEART", "CLUB", "DIAMOND", "SPADE"]:
-    #         self._suit = suit
-    #     else:
-    #         print("Not a valid suit.")
-    #
-    # @number.setter
-    # def number(self, number):
-    #     if number.upper() in ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]:
-    #         self._number = number
-    #     else:
-    #         print("Not a valid number.")
+    # def select_card(self):
+    #     self._is_selected = not self._is_selected
 
 
 class Deck:
@@ -124,6 +109,11 @@ class Player:
 
     def get_selected_card(self):
         return self.selected_card
+
+    def unselect_all_cards(self):
+        self.selected_card = None
+        for card in self.hand:
+            card._is_selected = False
 
 
 class PileDown:
