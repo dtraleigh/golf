@@ -146,7 +146,8 @@ class PileUp:
         self.selected = False
 
     def add(self, card):
-        self.cards.append(card)
+        # self.cards.append(card)
+        self.cards = [card] + self.cards
 
     def length(self):
         return len(self.cards)
@@ -156,3 +157,6 @@ class PileUp:
 
     def is_selected(self):
         return self.selected
+
+    def get_top_card(self):
+        return self.cards[0]

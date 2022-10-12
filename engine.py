@@ -30,6 +30,7 @@ class GolfEngine:
         self.deal()
         self.current_player = self.player1
         self.state = GameState.PREP
+        self.draw_count = 0
 
     def deal(self):
         # 6 cards to each player
@@ -55,3 +56,22 @@ class GolfEngine:
 
     def play_game(self):
         self.state = GameState.PLAYING
+
+    def draw_card_on_turn(self):
+        if self.draw_count == 0:
+            self.draw_count += 1
+        else:
+            self.draw_count = 1
+
+    def exchange_hand_card_with_pile_up_card(self, hand_card, pile_up_card):
+        players_selected_card_list_pos = self.current_player.hand.index(hand_card)
+
+        self.pile_up.cards[0] = hand_card
+        self.current_player.hand[players_selected_card_list_pos] = pile_up_card
+
+        self.current_player.hand[players_selected_card_list_pos].flip_card()
+
+    def end_turn(self):
+        self.switch_player()
+        self.pile_up.select_pile_up_card()
+        self.draw_count = 0

@@ -49,6 +49,21 @@ def user_wants_exchange():
 
 
 def player_turn(rects_click):
+    ###
+    # On their turn, a player can either
+    # Reveal a card that has _face = False
+    # OR
+    # exchange any card in the hand for the pile_up face card
+    # OR
+    # move top of pile_down to pile_up
+    # then either
+    #  1. Pass
+    #  2. exchange any card in the hand for the pile_up face card
+
+    # Before drawing from the pile_down, player can either
+    # 1. Reveal a card in their hand
+    # 2. Exchange pile_up card for a card in their hand
+    ###
     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
         mouse_down_pos = pygame.mouse.get_pos()
         for count, rect in enumerate(rects_click):
@@ -56,10 +71,11 @@ def player_turn(rects_click):
             if player_click == 1:
                 if count == 0:
                     # Player clicked on pile_down
-                    pass
+                    if golf.draw_count < 1:
+                        golf.pile_up.add(golf.pile_down.deal_card())
+                        golf.draw_card_on_turn()
                 elif count == 1:
                     # Player clicked on pile_up
-                    # toggle border and select/deselect it
                     golf.pile_up.select_pile_up_card()
                 else:
                     # If the card is face down, flip it on click
@@ -67,16 +83,8 @@ def player_turn(rects_click):
                     if not selected_card.face:
                         selected_card.flip_card()
                         golf.switch_player()
-                        # p1_border_control = clear_all_borders()
-                        # p2_border_control = clear_all_borders()
                     else:
                         # else if card in this rect is face up, add the border and mark it selected
-                        # p1_border_control = clear_all_borders()
-                        # p2_border_control = clear_all_borders()
-                        # if golf.current_player.name == "Player 1":
-                        #     p1_border_control[count - 2] = not p1_border_control[count - 2]
-                        # else:
-                        #     p2_border_control[count - 2] = not p2_border_control[count - 2]
                         golf.current_player.select_card_in_hand(selected_card)
     # If a face up card from the hand is selected and the pile_up card is selected, the player may want to
     # make an exchange. Prompt them and offer an exchange button
@@ -85,18 +93,11 @@ def player_turn(rects_click):
         if user_wants_exchange():
             # Swap the pile_up card with the player's selected card
             # then end the turn
-            pile_up_card = golf.pile_up.cards[-1]
+            pile_up_card = golf.pile_up.get_top_card()
             players_selected_card = golf.current_player.get_selected_card()
-            players_selected_card_list_pos = golf.current_player.hand.index(players_selected_card)
+            golf.exchange_hand_card_with_pile_up_card(players_selected_card, pile_up_card)
 
-            golf.pile_up.cards[-1] = players_selected_card
-            golf.current_player.hand[players_selected_card_list_pos] = pile_up_card
-            golf.current_player.hand[players_selected_card_list_pos].flip_card()
-
-            golf.switch_player()
-            golf.pile_up.select_pile_up_card()
-            # p1_border_control = clear_all_borders()
-            # p2_border_control = clear_all_borders()
+            golf.end_turn()
 
 
 # game init
@@ -151,14 +152,12 @@ for card, position in zip(golf.player1.hand, player1_card_positions):
     card_rect.center = position
     card_rect.w, card_rect.h = card_size
     p1_rects.append(card_rect)
-# p1_border_control = clear_all_borders()
 
 for card, position in zip(golf.player2.hand, player2_card_positions):
     card_rect = card._image.get_rect()
     card_rect.center = position
     card_rect.w, card_rect.h = card_size
     p2_rects.append(card_rect)
-# p2_border_control = clear_all_borders()
 
 pile_down_rect = card_back.get_rect()
 pile_down_rect.center = (1300, 680)
@@ -167,7 +166,6 @@ pile_down_rect.w, pile_down_rect.h = card_size
 # Initial draw card
 pile_up_rect = golf.pile_up.cards[0]._image.get_rect()
 pile_up_rect.center = (950, 510)
-pile_up_counter = 0
 
 selected = None
 is_running = True
@@ -201,7 +199,8 @@ while is_running:
     screen.blit(pygame.transform.scale(card_back, card_size), pile_down_rect)
 
     # Create pile up
-    screen.blit(pygame.transform.scale(golf.pile_up.cards[pile_up_counter]._image, card_size), pile_up_rect)
+    # first position is the top
+    screen.blit(pygame.transform.scale(golf.pile_up.get_top_card()._image, card_size), pile_up_rect)
 
     ###### End Card stuff ######
 
@@ -243,19 +242,6 @@ while is_running:
             current_player_text = font.render(f"Turn: {golf.current_player.name}", True, green, blue)
             screen.blit(current_player_text, (950, 140))
 
-            # On their turn, a player can either
-            # Reveal a card that has _face = False
-            # OR
-            # exchange any card in the hand for the pile_up face card
-            # OR
-            # move top of pile_down to pile_up
-            # then either
-            #  1. Pass
-            #  2. exchange any card in the hand for the pile_up face card
-
-            # Before drawing from the pile_down, player can either
-            # 1. Reveal a card in their hand
-            # 2. Exchange pile_up card for a card in their hand
             possible_rects_to_click = [pile_down_rect, pile_up_rect]
 
             if golf.current_player.name == "Player 1":
@@ -344,9 +330,9 @@ while is_running:
             screen.blit(pile_down_count, (600, 700))
             pile_up_count = font.render(f"Cards in pile_up: {str(golf.pile_up.length())}", True, green, blue)
             screen.blit(pile_up_count, (600, 730))
-            current_player = font.render(f"current_player: {golf.current_player.name}", True, green, blue)
-            screen.blit(current_player, (600, 760))
-            pile_up_list = font.render(f"golf.pile_up.hand: {golf.pile_up.cards}", True, green, blue)
+            golf_draw_count = font.render(f"golf.draw_count: {golf.draw_count}", True, green, blue)
+            screen.blit(golf_draw_count, (600, 760))
+            pile_up_list = font.render(f"golf.pile_up.hand: {golf.pile_up.cards[:3]}", True, green, blue)
             screen.blit(pile_up_list, (600, 790))
             current_player_get_selected = font.render(f"get_selected_card: {golf.current_player.get_selected_card()}", True, green, blue)
             screen.blit(current_player_get_selected, (600, 820))
