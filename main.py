@@ -10,17 +10,28 @@ def draw_rect_border(surface, x, y):
 
 def exchange_button_behavior(mouse):
     # if mouse is hovered on a button it changes to lighter shade
-    exchange_button_x = 882
-    exchange_button_y = 83
+    exchange_button_x = exchange_button_rect.x
+    exchange_button_y = exchange_button_rect.y
     if exchange_button_x <= mouse[0] <= exchange_button_x + 140 and exchange_button_y <= mouse[1] <= exchange_button_y + 40:
-        # pygame.draw.rect(screen, color_light, [exchange_button_x, exchange_button_y, 140, 40])
         pygame.draw.rect(screen, color_light, exchange_button_rect)
     else:
-        # pygame.draw.rect(screen, color_dark, [exchange_button_x, exchange_button_y, 140, 40])
         pygame.draw.rect(screen, color_dark, exchange_button_rect)
 
     # superimposing the text onto our button
     screen.blit(exchange_button_text, (exchange_button_x, exchange_button_y))
+
+
+def pass_button_behavior(mouse):
+    # pass_button_x = 782
+    # pass_button_y = 83
+    pass_button_x = pass_button_rect.x
+    pass_button_y = pass_button_rect.y
+    if pass_button_x <= mouse[0] <= pass_button_x + 140 and pass_button_y <= mouse[1] <= pass_button_y + 40:
+        pygame.draw.rect(screen, color_light, pass_button_rect)
+    else:
+        pygame.draw.rect(screen, color_dark, pass_button_rect)
+
+    screen.blit(pass_button_text, (pass_button_x, pass_button_y))
 
 
 def get_number_of_flipped_cards(hand):
@@ -70,6 +81,7 @@ def player_turn(rects_click):
                     if golf.draw_count < 1:
                         golf.pile_up.add(golf.pile_down.deal_card())
                         golf.draw_card_on_turn()
+                        golf.show_pass_button()
                 elif count == 1:
                     # Player clicked on pile_up
                     golf.pile_up.select_pile_up_card()
@@ -98,6 +110,13 @@ def player_turn(rects_click):
 
             golf.end_turn()
 
+    if golf.option_to_pass:
+        pass_button_behavior(mouse_position)
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            player_click_pass = pass_button_rect.collidepoint(mouse_position)
+            if player_click_pass == 1:
+                golf.end_turn()
+
 
 # game init
 pygame.init()
@@ -108,7 +127,7 @@ screen = pygame.display.set_mode(bounds)
 pygame.display.set_caption("Golf")
 
 # For debugging
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 # some colors
 white = (255, 255, 255)
@@ -125,11 +144,13 @@ title_text = font.render("Golf, the card game", True, green, blue)
 p1_text = font.render("Player 1", True, green, blue)
 p2_text = font.render("Player 2", True, green, blue)
 exchange_button_text = smallfont.render("Exchange", True, white)
+pass_button_text = smallfont.render("Pass", True, white)
 
 # rects
 title_rect = title_text.get_rect()
 title_rect.center = (width // 2, 50)
 exchange_button_rect = exchange_button_text.get_rect(center=(950, 100))
+pass_button_rect = pass_button_text.get_rect(center=(800, 100))
 
 # card stuff
 card_back = pygame.image.load('images/BACK.png')
@@ -256,9 +277,35 @@ while is_running:
             if golf.pile_up.is_selected():
                 draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
 
-        # game over man
+        # last round
         elif golf.state.value == 2:
-            pass
+            current_player_text = font.render(f"Last round: {golf.current_player.name}", True, green, blue)
+            screen.blit(current_player_text, (950, 140))
+
+            possible_rects_to_click = [pile_down_rect, pile_up_rect]
+
+            if golf.current_player.name == "Player 1":
+                possible_rects_to_click += p1_rects
+                player_turn(possible_rects_to_click)
+            else:
+                possible_rects_to_click += p2_rects
+                player_turn(possible_rects_to_click)
+
+            # Adding borders to selected cards
+            for card, rect in zip(golf.current_player.hand, possible_rects_to_click[2:]):
+                if card == golf.current_player.get_selected_card():
+                    draw_rect_border(screen, rect.x, rect.y)
+
+            if golf.pile_up.is_selected():
+                draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
+
+            # Flip all remaining cards
+            golf.current_player.flip_over_all_cards()
+
+        # Game over man
+        elif golf.state.value == 3:
+            current_player_text = font.render(f"Game over, man!", True, green, blue)
+            screen.blit(current_player_text, (950, 140))
 
     ###### end Game logic ######
 

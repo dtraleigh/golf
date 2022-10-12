@@ -35,20 +35,14 @@ class Card:
         return self.X, self.Y
 
     @property
-    def face(self):
+    def is_face_up(self):
         # face up or down, default is down which I'm calling False
         return self._face
-
-    # def is_selected(self):
-    #     return self._is_selected
 
     def flip_card(self):
         # In golf, once a card in a hand is flipped up, it is never face down again
         if not self._face:
             self._face = True
-
-    # def select_card(self):
-    #     self._is_selected = not self._is_selected
 
 
 class Deck:
@@ -114,6 +108,16 @@ class Player:
         self.selected_card = None
         for card in self.hand:
             card._is_selected = False
+
+    def has_all_cards_face_up(self):
+        for card in self.hand:
+            if not card.is_face_up:
+                return False
+        return True
+
+    def flip_over_all_cards(self):
+        for card in self.hand:
+            card.flip_card()
 
 
 class PileDown:
