@@ -73,7 +73,10 @@ class GolfEngine:
         self.current_player.hand[players_selected_card_list_pos].flip_card()
 
     def end_turn(self):
-        self.last_round()
+        if self.state == GameState.LASTROUND:
+            self.end_game()
+        else:
+            self.last_round_check()
         self.switch_player()
         self.pile_up.select_pile_up_card()
         self.draw_count = 0
@@ -82,12 +85,13 @@ class GolfEngine:
         self.player2.unselect_all_cards()
         self.option_to_pass = False
 
-    def last_round(self):
+    def last_round_check(self):
         if self.current_player.has_all_cards_face_up():
             self.state = GameState.LASTROUND
 
     def end_game(self):
         self.state = GameState.ENDED
+        self.current_player.flip_over_all_cards()
 
     def show_pass_button(self):
         self.option_to_pass = True

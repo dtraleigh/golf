@@ -3,11 +3,11 @@ import pygame
 
 
 class Card:
-    def __init__(self, suit, number, value):
+    def __init__(self, suit, number, point_value):
         self._suit = suit  # underscore means should not change this, just good practice and good programming style
         self._number = number
         self._image = pygame.image.load(f"images/{self._suit}-{str(self.number)}.svg")
-        self._value = value
+        self._point_value = point_value
         self._face = False
         # self._is_selected = False
 
@@ -28,7 +28,7 @@ class Card:
 
     @property
     def value(self):
-        return self._value
+        return self._point_value
 
     @property
     def hand_position(self):
@@ -91,6 +91,7 @@ class Player:
         self.hand = []
         self.name = name
         self.selected_card = None
+        self.score = 0
 
     def draw(self, deck):
         self.hand.append(deck.deal_card())
@@ -118,6 +119,26 @@ class Player:
     def flip_over_all_cards(self):
         for card in self.hand:
             card.flip_card()
+
+    def calculate_score(self, cards):
+        # First, check for row pairs and exclude them from the score count
+        points_list = []
+        if cards[0]._number == cards[1]._number:
+            points_list += [0, 0]
+        else:
+            points_list += [cards[0]._point_value, cards[1]._point_value]
+
+        if cards[2]._number == cards[3]._number:
+            points_list += [0, 0]
+        else:
+            points_list += [cards[2]._point_value, cards[3]._point_value]
+
+        if cards[4]._number == cards[5]._number:
+            points_list += [0, 0]
+        else:
+            points_list += [cards[4]._point_value, cards[5]._point_value]
+
+        return sum(points_list)
 
 
 class PileDown:

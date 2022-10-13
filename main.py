@@ -264,16 +264,15 @@ while is_running:
 
             if golf.current_player.name == "Player 1":
                 possible_rects_to_click += p1_rects
-                player_turn(possible_rects_to_click)
             else:
                 possible_rects_to_click += p2_rects
-                player_turn(possible_rects_to_click)
+
+            player_turn(possible_rects_to_click)
 
             # Adding borders to selected cards
             for card, rect in zip(golf.current_player.hand, possible_rects_to_click[2:]):
                 if card == golf.current_player.get_selected_card():
                     draw_rect_border(screen, rect.x, rect.y)
-
             if golf.pile_up.is_selected():
                 draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
 
@@ -286,26 +285,28 @@ while is_running:
 
             if golf.current_player.name == "Player 1":
                 possible_rects_to_click += p1_rects
-                player_turn(possible_rects_to_click)
             else:
                 possible_rects_to_click += p2_rects
-                player_turn(possible_rects_to_click)
+
+            player_turn(possible_rects_to_click)
 
             # Adding borders to selected cards
             for card, rect in zip(golf.current_player.hand, possible_rects_to_click[2:]):
                 if card == golf.current_player.get_selected_card():
                     draw_rect_border(screen, rect.x, rect.y)
-
             if golf.pile_up.is_selected():
                 draw_rect_border(screen, pile_up_rect.x, pile_up_rect.y)
-
-            # Flip all remaining cards
-            golf.current_player.flip_over_all_cards()
 
         # Game over man
         elif golf.state.value == 3:
             current_player_text = font.render(f"Game over, man!", True, green, blue)
             screen.blit(current_player_text, (950, 140))
+
+            # Displays the final player score
+            p1_score = font.render(f"Score: {golf.player1.calculate_score(golf.player1.hand)}", True, green, blue)
+            screen.blit(p1_score, (200, 1040))
+            p2_score = font.render(f"Score: {golf.player2.calculate_score(golf.player2.hand)}", True, green, blue)
+            screen.blit(p2_score, (1550, 1040))
 
     ###### end Game logic ######
 
