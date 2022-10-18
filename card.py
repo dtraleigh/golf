@@ -9,7 +9,6 @@ class Card:
         self._image = pygame.image.load(f"images/{self._suit}-{str(self.number)}.svg")
         self._point_value = point_value
         self._face = False
-        # self._is_selected = False
 
     def __repr__(self):
         return f"{self._number} of {self._suit}"

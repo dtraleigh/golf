@@ -26,12 +26,25 @@ def pass_button_behavior(mouse):
     # pass_button_y = 83
     pass_button_x = pass_button_rect.x
     pass_button_y = pass_button_rect.y
-    if pass_button_x <= mouse[0] <= pass_button_x + 140 and pass_button_y <= mouse[1] <= pass_button_y + 40:
+    if pass_button_x <= mouse[0] <= pass_button_x + 100 and pass_button_y <= mouse[1] <= pass_button_y + 40:
         pygame.draw.rect(screen, color_light, pass_button_rect)
     else:
         pygame.draw.rect(screen, color_dark, pass_button_rect)
 
     screen.blit(pass_button_text, (pass_button_x, pass_button_y))
+
+
+def restart_button_behavior(mouse):
+    restart = False
+    pygame.draw.rect(screen, blue, restart_button_rect)
+    screen.blit(restart_button_text, (restart_button_rect.x, restart_button_rect.y))
+
+    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+        player_click_restart = restart_button_rect.collidepoint(mouse)
+        if player_click_restart == 1:
+            restart = True
+
+    return restart
 
 
 def get_number_of_flipped_cards(hand):
@@ -87,15 +100,29 @@ def player_turn(rects_click):
                     golf.pile_up.select_pile_up_card()
                 else:
                     # Player clicked on one of the 6 hand cards
-                    # If the card is face down, select it (border is added)
-                    # On a second click, flip it on click and end turn
-                    selected_card = golf.current_player.hand[count - 2]
-
-                    if not golf.current_player.selected_card:
-                        golf.current_player.select_card_in_hand(selected_card)
-                    else:
-                        selected_card.flip_card()
+                    # If draw_count = 1, clicking on any card selects it
+                    # If draw_count = 0 and player clicks on a face down card not previously selected,
+                    #   the clicked face down card is selected
+                    # If draw_count = 0 and player clicks on a face down card previously selected,
+                    #   the clicked face down card is flipped and the turn is over
+                    # else if any card is clicked, make it the selected card
+                    clicked_card = golf.current_player.hand[count - 2]
+                    currently_selected_card = golf.current_player.selected_card
+                    if golf.draw_count == 1:
+                        golf.current_player.select_card_in_hand(clicked_card)
+                    elif golf.draw_count == 0 and not clicked_card.is_face_up and clicked_card != currently_selected_card:
+                        golf.current_player.select_card_in_hand(clicked_card)
+                    elif golf.draw_count == 0 and not clicked_card.is_face_up and clicked_card == currently_selected_card:
+                        clicked_card.flip_card()
                         golf.end_turn()
+                    else:
+                        golf.current_player.select_card_in_hand(clicked_card)
+
+                    # if not golf.current_player.selected_card:
+                    #     golf.current_player.select_card_in_hand(selected_card)
+                    # else:
+                    #     selected_card.flip_card()
+                    #     golf.end_turn()
 
     # If a face up card from the hand is selected and the pile_up card is selected, the player may want to
     # make an exchange. Prompt them and offer an exchange button
@@ -145,12 +172,14 @@ p1_text = font.render("Player 1", True, green, blue)
 p2_text = font.render("Player 2", True, green, blue)
 exchange_button_text = smallfont.render("Exchange", True, white)
 pass_button_text = smallfont.render("Pass", True, white)
+restart_button_text = smallfont.render("Play again?", True, green, blue)
 
 # rects
 title_rect = title_text.get_rect()
 title_rect.center = (width // 2, 50)
 exchange_button_rect = exchange_button_text.get_rect(center=(950, 100))
 pass_button_rect = pass_button_text.get_rect(center=(800, 100))
+restart_button_rect = restart_button_text.get_rect(center=(950, 200))
 
 # card stuff
 card_back = pygame.image.load('images/BACK.png')
@@ -301,6 +330,10 @@ while is_running:
         elif golf.state.value == 3:
             current_player_text = font.render(f"Game over, man!", True, green, blue)
             screen.blit(current_player_text, (950, 140))
+
+            restart_game = restart_button_behavior(mouse_position)
+            if restart_game:
+                golf = GolfEngine()
 
             # Displays the final player score
             p1_score = font.render(f"Score: {golf.player1.calculate_score(golf.player1.hand)}", True, green, blue)
