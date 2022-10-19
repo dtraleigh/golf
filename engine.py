@@ -189,22 +189,10 @@ class GolfEngine:
         # If a face up card from the hand is selected and the pile_up card is selected, the player may want to
         # make an exchange. Prompt them and offer an exchange button
         if self.pile_up.is_selected() and self.current_player.get_selected_card():
-            self.exchange_button_behavior(mouse_down_pos)
-            if self.user_wants_exchange(event):
-                # Swap the pile_up card with the player's selected card
-                # then end the turn
-                pile_up_card = self.pile_up.get_top_card()
-                players_selected_card = self.current_player.get_selected_card()
-                self.exchange_hand_card_with_pile_up_card(players_selected_card, pile_up_card)
-
-                self.end_turn()
+            self.exchange_button_behavior(mouse_down_pos, event)
 
         if self.option_to_pass:
-            self.pass_button_behavior(mouse_down_pos)
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                player_click_pass = pass_button_rect.collidepoint(mouse_down_pos)
-                if player_click_pass == 1:
-                    self.end_turn()
+            self.pass_button_behavior(mouse_down_pos, event)
 
     def user_wants_exchange(self, event):
         # return True if the user clicked the exchange button
@@ -216,28 +204,35 @@ class GolfEngine:
 
         return False
 
-    def exchange_button_behavior(self, mouse):
+    def exchange_button_behavior(self, mouse, event):
         # if mouse is hovered on a button it changes to lighter shade
         exchange_button_x = exchange_button_rect.x
         exchange_button_y = exchange_button_rect.y
-        if exchange_button_x <= mouse[0] <= exchange_button_x + 140 and exchange_button_y <= mouse[
-            1] <= exchange_button_y + 40:
-            pygame.draw.rect(screen, color_light, exchange_button_rect)
-        else:
-            pygame.draw.rect(screen, color_dark, exchange_button_rect)
+        pygame.draw.rect(screen, blue, exchange_button_rect)
 
         # superimposing the text onto our button
         screen.blit(exchange_button_text, (exchange_button_x, exchange_button_y))
 
-    def pass_button_behavior(self, mouse):
+        if self.user_wants_exchange(event):
+            # Swap the pile_up card with the player's selected card
+            # then end the turn
+            pile_up_card = self.pile_up.get_top_card()
+            players_selected_card = self.current_player.get_selected_card()
+            self.exchange_hand_card_with_pile_up_card(players_selected_card, pile_up_card)
+
+            self.end_turn()
+
+    def pass_button_behavior(self, mouse, event):
         pass_button_x = pass_button_rect.x
         pass_button_y = pass_button_rect.y
-        if pass_button_x <= mouse[0] <= pass_button_x + 100 and pass_button_y <= mouse[1] <= pass_button_y + 40:
-            pygame.draw.rect(screen, color_light, pass_button_rect)
-        else:
-            pygame.draw.rect(screen, color_dark, pass_button_rect)
+        pygame.draw.rect(screen, blue, pass_button_rect)
 
         screen.blit(pass_button_text, (pass_button_x, pass_button_y))
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            player_click_pass = pass_button_rect.collidepoint(mouse)
+            if player_click_pass == 1:
+                self.end_turn()
 
     def restart_button_behavior(self, mouse, event):
         restart = False
