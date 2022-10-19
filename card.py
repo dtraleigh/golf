@@ -139,6 +139,15 @@ class Player:
 
         return sum(points_list)
 
+    def get_number_of_flipped_cards(self):
+        # return the number of cards that are flipped in a player's hand
+        flipped_cards = 0
+        for card in self.hand:
+            if card._face:
+                flipped_cards += 1
+
+        return flipped_cards
+
 
 class PileDown:
     def __init__(self):
