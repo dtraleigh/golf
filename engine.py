@@ -86,9 +86,6 @@ class GolfEngine:
         # Add a card from pile_down to pile_up
         self.pile_up.add(self.pile_down.deal_card())
 
-        # print(f"Player 1 cards: {self.player1.hand}")
-        # print(f"Player 2 cards: {self.player2.hand}")
-
     def switch_player(self):
         if self.current_player == self.player1:
             self.current_player = self.player2

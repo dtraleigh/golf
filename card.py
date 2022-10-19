@@ -68,8 +68,8 @@ class Deck:
                     self._cards.append(Card(suit, number, 0))
 
         # add the two jokers
-        self._cards.append(Card("JOKER", 1, -2))
-        self._cards.append(Card("JOKER", 2, -2))
+        self._cards.append(Card("JOKER1", 1, -2))
+        self._cards.append(Card("JOKER2", 1, -2))
 
     def shuffle(self):
         random.shuffle(self._cards)
