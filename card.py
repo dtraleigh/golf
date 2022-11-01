@@ -52,7 +52,7 @@ class Deck:
 
     def populate(self):
         suits = ["HEART", "CLUB", "DIAMOND", "SPADE"]
-        # 1 through 13 or A, 1-10, J, Q, K
+        # 1 through 14 representing A, 1-10, J, Q, K, Joker
         numbers = [x for x in range(1, 14)]
 
         for suit in suits:
@@ -68,8 +68,8 @@ class Deck:
                     self._cards.append(Card(suit, number, 0))
 
         # add the two jokers
-        self._cards.append(Card("JOKER1", 1, -2))
-        self._cards.append(Card("JOKER2", 1, -2))
+        self._cards.append(Card("JOKER1", 14, -2))
+        self._cards.append(Card("JOKER2", 14, -2))
 
     def shuffle(self):
         random.shuffle(self._cards)
@@ -84,6 +84,13 @@ class Deck:
     def length(self):
         return len(self._cards)
 
+    def get_specific_card_from_deck(self, suit, number):
+        # suits are "HEART", "CLUB", "DIAMOND", "SPADE", "JOKER1", "JOKER2"
+        # number can be 1 through 14 representing A, 1-10, J, Q, K, Joker
+        for count, card in enumerate(self._cards):
+            if card._suit == suit and card._number == number:
+                return self._cards.pop(count)
+        return None
 
 class Player:
     def __init__(self, name):
